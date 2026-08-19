@@ -1,0 +1,1 @@
+window.RATE_DATA = [{"Currency":"INR","RateToUSD":0.012},{"Currency":"EUR","RateToUSD":1.09},{"Currency":"USD","RateToUSD":1},{"Currency":"JPY","RateToUSD":0.0069},{"Currency":"GBP","RateToUSD":1.28}];
