@@ -1,1 +1,1 @@
-window.DATE_DATA = [];
+window.DATE_DATA=Array.from({length:365},(_,i)=>{const d=new Date(2024,0,1+i),m=['January','February','March','April','May','June','July','August','September','October','November','December'],ds=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');return{Date:ds,Year:d.getFullYear(),Month:m[d.getMonth()],Quarter:'Q'+(Math.floor(d.getMonth()/3)+1),IsWeekend:(d.getDay()===0||d.getDay()===6)?'Yes':'No'};});
