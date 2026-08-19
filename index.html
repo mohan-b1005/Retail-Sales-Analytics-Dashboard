@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retail Sales Analytics Dashboard</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="header">
+      <div class="title">
+        <h1>Retail Sales Analytics</h1>
+        <p id="subtitle">Client-ready offline dashboard</p>
+      </div>
+      <div class="header-right">
+        <div class="currency-chip">Reporting Currency: <strong>USD</strong></div>
+        <div class="basis-chip">Sales = Quantity × Unit Price × RateToUSD</div>
+      </div>
+    </div>
+    <div class="nav" role="tablist" aria-label="Dashboard pages">
+      <button class="active" data-page="salesPage">Sales Performance</button>
+      <button data-page="customerPage">Customer Sales Analysis</button>
+    </div>
+    <div class="filters" aria-label="Global dashboard filters">
+      <div class="filter"><label for="yearFilter">Year</label><select id="yearFilter"></select></div>
+      <div class="filter"><label for="quarterFilter">Quarter</label><select id="quarterFilter"></select></div>
+      <div class="filter"><label for="monthFilter">Month</label><select id="monthFilter"></select></div>
+      <div class="filter"><label for="categoryFilter">Category</label><select id="categoryFilter"></select></div>
+      <div class="filter"><label for="regionFilter">Region</label><select id="regionFilter"></select></div>
+      <div class="filter"><label for="loyaltyFilter">Loyalty / Segment</label><select id="loyaltyFilter"></select></div>
+      <div class="filter"><label for="periodFilter">Reporting Period</label><select id="periodFilter"><option value="All">All</option><option value="MTD">MTD</option><option value="QTD">QTD</option><option value="YTD">YTD</option></select></div>
+      <button class="reset" id="resetFilters">Reset Filters</button>
+    </div>
+    <div class="quality" id="qualityNote"></div>
+  </div>
+
+  <main>
+    <section class="page active" id="salesPage" role="tabpanel">
+      <div class="page-head">
+        <div><h2>Sales Performance</h2><div class="sub" id="salesContext">Current filter context</div></div>
+        <div class="period-pills" aria-label="Reporting period selector">
+          <button data-period="All" class="active">All</button><button data-period="MTD">MTD</button><button data-period="QTD">QTD</button><button data-period="YTD">YTD</button>
+        </div>
+      </div>
+      <div class="kpis">
+        <div class="kpi"><div class="label">Total Sales</div><div class="value" id="kpiSales">—</div><div class="hint">Normalized to USD</div></div>
+        <div class="kpi"><div class="label">Total Orders</div><div class="value" id="kpiOrders">—</div><div class="hint">Distinct transaction IDs</div></div>
+        <div class="kpi"><div class="label">Total Quantity</div><div class="value" id="kpiQty">—</div><div class="hint">Units sold</div></div>
+        <div class="kpi"><div class="label">Quarter-over-Quarter Sales</div><div class="value" id="kpiQoQ">—</div><div class="hint">Comparable quarter-to-date</div></div>
+        <div class="kpi"><div class="label">Average Order Value</div><div class="value" id="kpiAov">—</div><div class="hint">Sales ÷ orders</div></div>
+        <div class="kpi"><div class="label">Last 3 Months Sales</div><div class="value" id="kpiL3M">—</div><div class="hint">Latest 3 calendar months in context</div></div>
+      </div>
+
+      <div class="grid">
+        <div class="panel span-8">
+          <div class="panel-head"><div><h3>Sales Performance by Category</h3><div class="panel-sub">Sales %, MTD, QTD and YTD use the latest date in the current dimensional filter context.</div></div></div>
+          <div class="table-wrap"><table id="categoryTable"><thead><tr><th data-key="category">Category</th><th data-key="sales">Sales</th><th data-key="share">Sales %</th><th data-key="mtd">MTD Sales</th><th data-key="qtd">QTD Sales</th><th data-key="ytd">YTD Sales</th></tr></thead><tbody></tbody></table></div>
+        </div>
+        <div class="panel span-4">
+          <div class="panel-head"><div><h3>Regional Sales Distribution</h3><div class="panel-sub">Share of filtered normalized sales by region</div></div></div>
+          <div id="regionalSalesDonut"></div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="panel span-8">
+          <div class="panel-head"><div><h3>Monthly Sales and Transactions</h3><div class="panel-sub">Sales bars with distinct transaction trend line</div></div></div>
+          <div class="chart" id="monthlyChart"></div>
+        </div>
+        <div class="panel span-4">
+          <div class="panel-head"><div><h3>Period Comparison</h3><div class="panel-sub">Latest month versus previous calendar month</div></div></div>
+          <div id="periodComparison"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="customerPage" role="tabpanel">
+      <div class="page-head">
+        <div><h2>Customer Sales Analysis</h2><div class="sub" id="customerContext">Customer behavior in current filter context</div></div>
+        <div><label for="customerCategoryFilter" style="font-size:10.5px;color:#667085;font-weight:700;margin-right:6px">Category</label><select id="customerCategoryFilter" class="mini-select"></select></div>
+      </div>
+      <div class="kpis customer">
+        <div class="kpi"><div class="label">Total Sales</div><div class="value" id="custSales">—</div><div class="hint">Normalized to USD</div></div>
+        <div class="kpi"><div class="label">Total Customers</div><div class="value" id="custTotal">—</div><div class="hint">Distinct customers</div></div>
+        <div class="kpi"><div class="label">Active Customers</div><div class="value" id="custActive">—</div><div class="hint">With ≥1 transaction in period</div></div>
+        <div class="kpi"><div class="label">Unique Regions</div><div class="value" id="custRegions">—</div><div class="hint">Represented in current context</div></div>
+        <div class="kpi"><div class="label">Basket Diversity</div><div class="value" id="custDiversity">—</div><div class="hint">Avg. distinct categories per customer</div></div>
+      </div>
+
+      <div class="grid">
+        <div class="panel span-7">
+          <div class="panel-head"><div><h3>Sales by Region and Loyalty Status</h3><div class="panel-sub">Stacked normalized sales by loyalty tier within each region</div></div></div>
+          <div id="regionLoyaltyBars"></div>
+        </div>
+        <div class="panel span-5">
+          <div class="panel-head"><div><h3>Regional Customer Distribution</h3><div class="panel-sub">Distinct active customers by region</div></div></div>
+          <div id="regionalCustomerDonut"></div>
+          <div class="mini-card"><span>Customers represented in regional distribution</span><strong id="regionalCustomerCount">0</strong></div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="panel span-6"><div class="panel-head"><div><h3>Top 5 Customers by Sales</h3></div></div><div id="topSales"></div></div>
+        <div class="panel span-6"><div class="panel-head"><div><h3>Bottom 5 Customers by Sales</h3></div></div><div id="bottomSales"></div></div>
+        <div class="panel span-6"><div class="panel-head"><div><h3>Top 5 Customers by Quantity</h3></div></div><div id="topQty"></div></div>
+        <div class="panel span-6"><div class="panel-head"><div><h3>Bottom 5 Customers by Quantity</h3></div></div><div id="bottomQty"></div></div>
+      </div>
+
+      <div class="grid">
+        <div class="panel span-4">
+          <div class="panel-head"><div><h3>Loyalty Status Distribution</h3><div class="panel-sub">Distinct customers by loyalty status</div></div></div>
+          <div id="loyaltyDonut"></div>
+        </div>
+        <div class="panel span-8">
+          <div class="panel-head"><div><h3>Transaction Value by Category</h3><div class="panel-sub">Total orders and period sales by category</div></div></div>
+          <div class="table-wrap"><table id="txnTable"><thead><tr><th data-key="category">Category</th><th data-key="orders">Total Orders</th><th data-key="mtd">MTD</th><th data-key="qtd">QTD</th><th data-key="sales">Sales</th></tr></thead><tbody></tbody></table></div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <div class="footer"><span>Reporting currency: USD · Rates sourced from workbook CurrencyRates sheet.</span><span>MTD/QTD/YTD anchor: latest transaction date in the current dimensional filter context. Standalone snapshot; regenerate when source data changes.</span></div>
+</div>
+<div class="tooltip" id="tooltip"></div>
+
+<script src="data-sales-1.js"></script>
+<script src="data-sales-2.js"></script>
+<script src="data-sales-3.js"></script>
+<script src="data-sales-4.js"></script>
+<script src="data-products.js"></script>
+<script src="data-customers.js"></script>
+<script src="data-date.js"></script>
+<script src="data-rates.js"></script>
+<script src="source-data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
