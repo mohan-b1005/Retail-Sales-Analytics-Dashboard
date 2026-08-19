@@ -1,0 +1,1 @@
+window.DATE_DATA = [];
